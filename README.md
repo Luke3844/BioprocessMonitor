@@ -31,6 +31,13 @@ The way it generates these is using classes.py:
 
 **Dashboard:**
 
+Pictured below is an example of the figure that the code prints out.
+Top left is the concentrations of Glucose, Biomass, and Product over time.
+Top right is the temperature over time.
+Bottom left is the pH over time.
+Bottom right is the concentration of dissolved oxygen over time.
+
+![Dashboard Image](figures/Batch_001_Mode_A.png)
 
 **Summary Table Mode A:**
 
