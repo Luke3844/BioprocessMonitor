@@ -19,4 +19,9 @@ Code Design:
 Dashboard:
 
 
-Summary Table:
+Summary Table Mode A:
+
+| batch_id | ph_optimal | temperature_C | C_product_g_L^-1_final |
+| :---: | :---: | :---: | :---: | :---: |
+| 1 | 2 | 3 | 4 | 5 |
+| :---: | :---: | :---: | :---: | :---: |
