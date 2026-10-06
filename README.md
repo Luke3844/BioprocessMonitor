@@ -1,23 +1,22 @@
-# Repository Structure
+# BioprocessMonitor
 
-`datasets/`: Store raw data in this directory. Delete `.gitkeep` once you add your own files to this directory.
+Overview:
+The goal of this project is to analyze data from a fermentation and export it to tables and figures.
 
-`figures/`: Export figures created by your code to this directory. Delete `.gitkeep` once you add your own files to this
-directory.
+Features:
+The BioprocessMonitor class takes in the file "fermentation_data" and then checks wether the given data points for each sample are within optimal temperature and pH ranges.
+Then the class generates a series of plots for one of the batches, and generates a CSV with the percentage of samples within optimal pH, temperatures, and final concentrations.
 
-`src/`: Store all Python code, except main.py, in this directory.
+Software Used:
+Python version 3.14.7
+Pandas version 3.0.6
+MatPlotLib version 3.11.2
+NumPy version 2.5.3
 
-`tables/`: Export tables created by your code to this directory. Delete `.gitkeep` once you add your own files to this
-directory.
+Code Design:
 
-`.gitignore`: Contains files to be ignored by Git. You can copy the `.gitignore` file from this repository into your own
-project.
 
-`environment.yaml`: Contains information about your conda environment. Run the following command:
-`conda export > environment.yaml` to generate this file for your project. You can delete the last line in this file that
-says `prefix`.
+Dashboard:
 
-`main.py`: This is the only Python file that will be run. It should be kept relatively clean and mainly execute code
-from `src/`.
 
-`README.md`: This file, which contains information about the repository.
+Summary Table:
