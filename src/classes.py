@@ -41,7 +41,7 @@ class BioprocessMonitor:
         return n_batches
 
     def export_dashboard(self, batch_id, filepath):
-        batch = pd.read_csv(filepath)
+        batch = self.extract_batch(batch_id=batch_id)
         time = batch["time_h"]
 
         fig, axes = plt.subplots(2, 2, figsize=[12, 8])
