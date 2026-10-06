@@ -88,7 +88,7 @@ class BioprocessMonitor:
 
         # Bottom-right: dissolved oxygen vs time
         ax = axes[1, 1]
-        ax.scatter(time, batch["dissolved_oxygen_percent"],
+        ax.scatter(time, batch["DO_percent"],
                    color="tab:cyan", marker="o", label="DO")
         ax.set_xlabel("Time (h)")
         ax.set_ylabel("Dissolved oxygen (%)")
