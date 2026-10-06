@@ -69,9 +69,8 @@ class BioprocessMonitor:
                    color="red", marker="x", label="Out of range")
         ax.set_xlabel("Time (h)")
         ax.set_ylabel("Temperature (°C)")
-        ax.set_title("Temperature")
         ax.legend()
-        ax.grid(alpha=0.3)
+        ax.grid(alpha=0.0)
 
         # Bottom-left: pH vs time
         ax = axes[1, 0]
@@ -82,9 +81,8 @@ class BioprocessMonitor:
                    color="red", marker="x", label="Out of range")
         ax.set_xlabel("Time (h)")
         ax.set_ylabel("pH")
-        ax.set_title("pH")
         ax.legend()
-        ax.grid(alpha=0.3)
+        ax.grid(alpha=0.0)
 
         # Bottom-right: dissolved oxygen vs time
         ax = axes[1, 1]
@@ -92,16 +90,11 @@ class BioprocessMonitor:
                    color="tab:cyan", marker="o", label="DO")
         ax.set_xlabel("Time (h)")
         ax.set_ylabel("Dissolved oxygen (%)")
-        ax.set_title("Dissolved oxygen")
-        ax.legend()
-        ax.grid(alpha=0.3)
+        ax.grid(alpha=0.0)
 
         # X-axis tick spacing
         for ax in axes.flat:
             ax.xaxis.set_major_locator(plt.MultipleLocator(6))
-
-        fig.suptitle(f"Batch {batch_id} — Bioprocess Dashboard",
-                     fontweight="bold")
         fig.tight_layout()
 
         fig.savefig(filepath, dpi=150, bbox_inches="tight")
