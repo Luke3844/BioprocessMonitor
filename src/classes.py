@@ -7,9 +7,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-from main import filepath_dataset
-
-
 class BioprocessMonitor:
     def __init__(self, filepath, ph_lims, temperature_lims):
         """
@@ -25,7 +22,8 @@ class BioprocessMonitor:
         temperature_lims : tuple[float, float]
             Lower and upper acceptable temperature limits.
         """
-        self.filepath = filepath_dataset
+        self.filepath = filepath
+        self.df = pd.read_csv(self.filepath)
         self.ph_lims = ph_lims
         self.temperature_lims = temperature_lims
 
@@ -44,9 +42,9 @@ class BioprocessMonitor:
             DataFrame containing only rows associated with
             the requested batch.
         """
-        extract_batch = pd.DataFrame[batch_id, :]
-
-
+        df = pd.read_csv(self.filepath)
+        batch_number = df.loc[batch_id, :]
+        return batch_number
 
     def optimal_ph_mask(self, df_batch):
         """
@@ -65,12 +63,11 @@ class BioprocessMonitor:
             is within the acceptable operating range.
         """
         ph_vals = df_batch.loc[:, "ph"]
-        ph_lims = self.ph_lims
-        ph_vals_acidic = ph_vals < ph_lims[0]
-        ph_vals_basic = ph_vals > ph_lims[1]
-        optimal_ph_mask = ph_vals_basic & ph_vals_acidic
-
-
+        ph_vals_acidic = ph_vals < self.ph_lims[0]
+        ph_vals_basic = ph_vals > self.ph_lims[1]
+        ph_vals_suboptimal = ph_vals_basic + ph_vals_acidic
+        ph_ok = ~ph_vals_suboptimal
+        return ph_ok
 
     def optimal_temperature_mask(self, df_batch):
         """
@@ -89,10 +86,11 @@ class BioprocessMonitor:
             is within the acceptable operating range.
         """
         temp_vals = df_batch.loc[:, "temperature_C"]
-        temp_lims = self.temperature_lims
-        temp_vals_low = temp_vals < temp_lims[0]
-        temp_vals_high = temp_vals > temp_lims[1]
-        optimal_temperature_mask = temp_vals_high & temp_vals_low
+        temp_vals_low = temp_vals < self.temperature_lims[0]
+        temp_vals_high = temp_vals > self.temperature_lims[1]
+        temp_vals_suboptimal = temp_vals_low + temp_vals_high
+        temp_ok = ~temp_vals_suboptimal
+        return temp_ok
 
     def get_n_batches(self):
         """
@@ -105,9 +103,8 @@ class BioprocessMonitor:
             Total number of distinct batch identifiers.
         """
         "Returns the number of batches in the dataset"
-        filepath = filepath_dataset
-        features = filepath.columns[1:]
-        get_n_batches = len(features)
+        get_n_batches = self.df['batch_id'].nunique()
+        print(get_n_batches)
 
     def export_dashboard(self, batch_id, filepath):
         """
@@ -182,3 +179,8 @@ class BioprocessMonitor:
         C_product_g_L^-1_final
             Final product concentration for the batch.
         """
+
+        column_names = ["batch_id", "ph_optimal_percent", "temperature_optimal_percent", "C_product_g_L^-1_final"]
+        filepath_export = pd.DataFrame(record, columns=column_names)
+        filepath_export_location = os.path.join("tables", "summary.csv")
+        filepath_export.to_csv(filepath_export_location, index=False)
