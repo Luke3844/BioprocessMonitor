@@ -26,13 +26,13 @@ class BioprocessMonitor:
     def optimal_ph_mask(self, df_batch):
 
         ph_vals = df_batch["pH"]
-        ph_ok = (ph_vals > self.ph_lims[0] + (ph_vals <= self.ph_lims[1]))
+        ph_ok = (ph_vals >= self.ph_lims[0]) & (ph_vals <= self.ph_lims[1])
         return ph_ok
 
     def optimal_temperature_mask(self, df_batch):
 
-        temp_vals = df_batch.loc["temperature_C"]
-        temp_ok = ((temp_vals >= self.temperature_lims[0]) & (temp_vals <= self.temperature_lims[1]))
+        temp_vals = df_batch["temperature_C"]
+        temp_ok = (temp_vals >= self.temperature_lims[0]) & (temp_vals <= self.temperature_lims[1])
         return temp_ok
 
     def get_n_batches(self):
