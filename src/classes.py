@@ -6,105 +6,39 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from src.functions import calculate_average
 
 class BioprocessMonitor:
     def __init__(self, filepath, ph_lims, temperature_lims):
-        """
-        Utility class used to monitor bioprocesses by
-        generating dashboards and summaries.
 
-        Parameters
-        ----------
-        filepath : str
-            Input CSV dataset path.
-        ph_lims : tuple[float, float]
-            Lower and upper acceptable pH limits.
-        temperature_lims : tuple[float, float]
-            Lower and upper acceptable temperature limits.
-        """
         self.filepath = filepath
         self.df = pd.read_csv(self.filepath)
         self.ph_lims = ph_lims
         self.temperature_lims = temperature_lims
 
     def extract_batch(self, batch_id):
-        """
-        Extracts data corresponding to a single batch.
 
-        Parameters
-        ----------
-        batch_id : int
-            Batch identifier.
-
-        Returns
-        -------
-        pandas.DataFrame
-            DataFrame containing only rows associated with
-            the requested batch.
-        """
-        df = pd.read_csv(self.filepath)
-        batch_number = df.loc[batch_id, :]
-        return batch_number
+        df = self.df
+        batch_number_mask = df['batch_id'] == batch_id
+        batch_numbered = df[batch_number_mask]
+        return batch_numbered
 
     def optimal_ph_mask(self, df_batch):
-        """
-        Determines whether each pH measurement falls within
-        the acceptable operating range.
 
-        Parameters
-        ----------
-        df_batch : pandas.DataFrame
-            Batch-specific DataFrame.
-
-        Returns
-        -------
-        array-like of bool
-            A mask whereby True indicates that the measurement
-            is within the acceptable operating range.
-        """
-        ph_vals = df_batch.loc[:, "ph"]
-        ph_vals_acidic = ph_vals < self.ph_lims[0]
-        ph_vals_basic = ph_vals > self.ph_lims[1]
-        ph_vals_suboptimal = ph_vals_basic + ph_vals_acidic
-        ph_ok = ~ph_vals_suboptimal
+        ph_vals = df_batch["pH"]
+        ph_ok = (ph_vals > self.ph_lims[0] + (ph_vals <= self.ph_lims[1]))
         return ph_ok
 
     def optimal_temperature_mask(self, df_batch):
-        """
-        Determines whether each temperature measurement falls
-        within the acceptable operating range.
 
-        Parameters
-        ----------
-        df_batch : pandas.DataFrame
-            Batch-specific DataFrame.
-
-        Returns
-        -------
-        array-like of bool
-            A mask whereby True indicates that the measurement
-            is within the acceptable operating range.
-        """
-        temp_vals = df_batch.loc[:, "temperature_C"]
-        temp_vals_low = temp_vals < self.temperature_lims[0]
-        temp_vals_high = temp_vals > self.temperature_lims[1]
-        temp_vals_suboptimal = temp_vals_low + temp_vals_high
-        temp_ok = ~temp_vals_suboptimal
+        temp_vals = df_batch.loc["temperature_C"]
+        temp_ok = ((temp_vals >= self.temperature_lims[0]) & (temp_vals <= self.temperature_lims[1]))
         return temp_ok
 
     def get_n_batches(self):
-        """
-        Determines the number of unique batches present
-        in the dataset.
 
-        Returns
-        -------
-        int
-            Total number of distinct batch identifiers.
-        """
-        "Returns the number of batches in the dataset"
-        get_n_batches = self.df['batch_id'].nunique()
-        print(get_n_batches)
+        n_batches = self.df['batch_id'].nunique()
+        return n_batches
 
     def export_dashboard(self, batch_id, filepath):
         """
@@ -155,32 +89,28 @@ class BioprocessMonitor:
         """
 
     def export_summary(self, filepath):
-        """
-        Generates a batch summary table and exports it to a CSV file.
 
-        Parameters
-        ----------
-        filepath : str
-            Output CSV table path.
 
-        Summary Table Columns
-        ---------------------
-        batch_id
-            Batch identifier.
+        summaries = []
+        batch_ids = sorted(self.df['batch_id'].unique().tolist())
 
-        ph_optimal_percent
-            Percentage of measurements in a batch within the
-            acceptable pH range, rounded to 2 decimal places.
+        for batch_id in batch_ids:
+            batch = self.extract_batch(batch_id=batch_id)
 
-        temperature_optimal_percent
-            Percentage of measurements in a batch within the
-            acceptable temperature range, rounded to 2 decimal places.
+            ph_ok = self.optimal_ph_mask(batch)
+            temp_ok = self.optimal_temperature_mask(batch)
 
-        C_product_g_L^-1_final
-            Final product concentration for the batch.
-        """
+            ph_percentage = round(100*ph_ok.mean(), 2)
+            temp_percentage = round(100*temp_ok.mean(), 2)
+            final_product = batch["C_product_g_L^-1"].iloc[-1]
+
+            summary = (batch_id, ph_percentage, temp_percentage, final_product)
+            summaries.append(summary)
+
+        print(summaries)
 
         column_names = ["batch_id", "ph_optimal_percent", "temperature_optimal_percent", "C_product_g_L^-1_final"]
-        filepath_export = pd.DataFrame(record, columns=column_names)
-        filepath_export_location = os.path.join("tables", "summary.csv")
-        filepath_export.to_csv(filepath_export_location, index=False)
+        summary_table = pd.DataFrame(summaries, columns=column_names)
+
+        summary_table_location = filepath
+        summary_table.to_csv(summary_table_location, index=False)
