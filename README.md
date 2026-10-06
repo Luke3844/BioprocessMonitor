@@ -15,6 +15,16 @@ NumPy version 2.5.3
 
 Code Design:
 
+When you run main.py it creates a dictionary of dictionaries for two different bioprocess operation modes.
+Then it runs the code to generate the tables and figures for all batch ids for both process modes.
+The way it generates these is using classes.py:
+
+ - extract_batch: Provides a dataframe with only the rows for the given batch_id.
+ - optimal_ph_mask: Creates a mask which returns "true" for rows with pH within optimal bounds.
+ - optimal_temperature_mask: Creates a mask which returns "true" for rows with temperature within optimal bounds.
+ - get_n_batches: Provides an integer with the number of batches in the table.
+ - export_dashboard: Creates the figures using matplotlib.
+ - export_summary: Creates the summary table for each batch.
 
 Dashboard:
 
