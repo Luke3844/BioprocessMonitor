@@ -41,52 +41,72 @@ class BioprocessMonitor:
         return n_batches
 
     def export_dashboard(self, batch_id, filepath):
-        """
-        Creates and saves a dashboard figure for a single batch.
+        batch = pd.read_csv(filepath)
+        time = batch["time_h"]
 
-        Parameters
-        ----------
-        batch_id : int
-            Batch identifier.
-        filepath : str
-            Output PNG image path.
+        fig, axes = plt.subplots(2, 2, figsize=[12, 8])
 
-        Dashboard Requirements
-        ----------------------
-        Create a 2 × 2 figure containing:
+        # Top-left: concentrations vs time
 
-        Top-Left
-            Glucose, biomass, and product concentrations versus time.
-            - A different color and marker should be used for each substance.
+        ax = axes[0,0]
+        ax.scatter(time, batch["C_product_g_L^-1"],
+                   color="tab:blue", marker = "o", label="Product")
+        ax.scatter(time, batch["C_glucose_g_L^-1"],
+                   color="tab:red", marker = "s", label="Glucose")
+        ax.scatter(time, batch["C_biomass_g_L^-1"],
+                   color="tab:green", marker = "^", label="Biomass")
+        ax.set_xlabel("Time (h)")
+        ax.set_ylabel("Concentration (g/L)")
+        ax.legend()
+        ax.grid(alpha=0.0)
 
-        Top-Right
-            Temperature versus time.
-            - Measurements within the acceptable temperature range
-              should be displayed as green circles.
-            - Measurements outside the acceptable temperature range
-              should be displayed as red X markers.
+        # Top-right: temperature vs time
+        ax = axes[0, 1]
+        temp_ok = self.optimal_temperature_mask(batch)
+        ax.scatter(time[temp_ok], batch.loc[temp_ok, "temperature_C"],
+                   color="green", marker="o", label="Optimal")
+        ax.scatter(time[~temp_ok], batch.loc[~temp_ok, "temperature_C"],
+                   color="red", marker="x", label="Out of range")
+        ax.set_xlabel("Time (h)")
+        ax.set_ylabel("Temperature (°C)")
+        ax.set_title("Temperature")
+        ax.legend()
+        ax.grid(alpha=0.3)
 
-        Bottom-Left
-            pH versus time.
-            - Measurements within the acceptable pH range
-              should be displayed as green circles.
-            - Measurements outside the acceptable pH range
-              should be displayed as red X markers.
+        # Bottom-left: pH vs time
+        ax = axes[1, 0]
+        ph_ok = self.optimal_ph_mask(batch)
+        ax.scatter(time[ph_ok], batch.loc[ph_ok, "pH"],
+                   color="green", marker="o", label="Optimal")
+        ax.scatter(time[~ph_ok], batch.loc[~ph_ok, "pH"],
+                   color="red", marker="x", label="Out of range")
+        ax.set_xlabel("Time (h)")
+        ax.set_ylabel("pH")
+        ax.set_title("pH")
+        ax.legend()
+        ax.grid(alpha=0.3)
 
-        Bottom-Right
-            Dissolved oxygen versus time.
+        # Bottom-right: dissolved oxygen vs time
+        ax = axes[1, 1]
+        ax.scatter(time, batch["dissolved_oxygen_percent"],
+                   color="tab:cyan", marker="o", label="DO")
+        ax.set_xlabel("Time (h)")
+        ax.set_ylabel("Dissolved oxygen (%)")
+        ax.set_title("Dissolved oxygen")
+        ax.legend()
+        ax.grid(alpha=0.3)
 
-        Additional Requirements
-        -----------------------
-        - Use scatter plots.
-        - Add x-axis and y-axis labels.
-        - Add legends where appropriate.
-        - Apply consistent formatting across all subplots unless
-          indicated otherwise.
-        - Apply a tick spacing of 6 h on the x-axis for all subplots.
-        - Save the figure to the provided filepath.
-        - Close the figure after saving.
-        """
+        # X-axis tick spacing
+        for ax in axes.flat:
+            ax.xaxis.set_major_locator(plt.MultipleLocator(6))
+
+        fig.suptitle(f"Batch {batch_id} — Bioprocess Dashboard",
+                     fontweight="bold")
+        fig.tight_layout()
+
+        fig.savefig(filepath, dpi=150, bbox_inches="tight")
+        plt.close(fig)
+
 
     def export_summary(self, filepath):
 
